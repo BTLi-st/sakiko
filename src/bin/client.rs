@@ -1,3 +1,6 @@
+/// 基于 tokio-tungstenite 的 WebSocket 客户端
+/// 用法：cargo run --bin client <host> <port>
+/// 默认连接为 ws://127.0.0.1:3000
 use futures_util::{SinkExt, StreamExt};
 use std::env;
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader, BufWriter};
@@ -20,6 +23,7 @@ async fn main() {
     let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
     let (mut write, mut read) = ws_stream.split();
 
+    // 创建标准输入输出的读写器
     let stdin = io::stdin();
     let stdout = io::stdout();
     let mut stdin_reader = BufReader::new(stdin).lines();
@@ -38,6 +42,7 @@ async fn main() {
     // 创建一个 watch 用于通知退出
     let (tx, mut rx) = watch::channel(());
 
+    // 从标准输入读取用户输入，并发送到 WebSocket 服务器
     let client_to_server = tokio::spawn(async move {
         loop {
             tokio::select! {
@@ -56,6 +61,7 @@ async fn main() {
         }
     });
 
+    // 从 WebSocket 服务器读取消息，并输出到标准输出
     let server_to_client = tokio::spawn(async move {
         while let Some(Ok(msg)) = read.next().await {
             if let Message::Text(text) = msg {

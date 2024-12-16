@@ -1,3 +1,6 @@
+/// 同步版本的运行程序
+/// 通过标准输入输出进行交互
+/// 用法: cargo run --release -- <config file>
 use sakiko::Session;
 use sakiko::load_config;
 use std::env;

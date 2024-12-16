@@ -1,5 +1,8 @@
+/// 基于 tokio-tungstenite 的 WebSocket 服务端
+/// 用法：cargo run --bin server <config file> <host> <port>
+/// 默认监听地址为 127.0.0.1:3000
 use futures_util::{SinkExt, StreamExt};
-use log::{error, info};
+use log::{error, info, debug};
 use sakiko::{load_config, Session};
 use std::env;
 use tokio::net::TcpListener;
@@ -22,13 +25,19 @@ async fn main() {
 
     let addr = format!("{}:{}", host, port);
     let config = load_config(&config_file).unwrap();
+
+    info!("Config {} loaded", config_file);
+
     let listener = TcpListener::bind(&addr).await.unwrap();
 
     info!("Listening on: {}", addr);
 
-    while let Ok((stream, _)) = listener.accept().await {
+    // 为每个连接创建一个新的会话
+    while let Ok((stream, cilent)) = listener.accept().await {
+        info!("New client: {}", cilent);
         let mut session = Session::new(config.clone());
         tokio::spawn(async move {
+            // 创建 WebSocket 连接
             let ws_stream = match accept_async(stream).await {
                 Ok(ws_stream) => ws_stream,
                 Err(err) => {
@@ -38,13 +47,15 @@ async fn main() {
             };
             let (mut write, mut read) = ws_stream.split();
             let msg = Message::Text(session.get_bot_name().into());
+            // 开始会话
             match write.send(msg).await {
-                Ok(_) => info!("Connected to {}", session.get_bot_name()),
+                Ok(_) => debug!("{} start to work for {}", session.get_bot_name(), cilent),
                 Err(err) => {
                     error!("Failed to send message: {}", err);
                     return;
                 }
             }
+            // 会话循环
             loop {
                 match session.need_stop() {
                     Ok(true) => break,
