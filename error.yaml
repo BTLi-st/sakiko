@@ -1,0 +1,44 @@
+bot_name: Sakiko
+start_step: start
+variables:
+  str_vec: !StrVec
+  - a
+  - b
+  float_vec: !FloatVec
+  - 1.0
+  - 2.0
+  - 3.0
+  input: !Str test
+  int1: !Int 1
+  float: !Float 1.0
+  int2: !Int 2
+  int_vec: !IntVec
+  - 1
+  - 2
+  - 3
+steps:
+  end:
+    description:
+    - End of the conversation {}
+    - - int1
+    transaction: []
+  start:
+    description:
+    - Start of the conversation
+    - []
+    transaction:
+    - pattern: goodbye
+      compares:
+      - compare: And
+        compare_type: !Ne
+        - int1
+        - int3
+      step: end
+      operation:
+      - !Let
+        - int
+        - !Int 2
+      - !Add
+        - int1
+        - int1
+        - int2

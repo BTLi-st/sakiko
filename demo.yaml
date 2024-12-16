@@ -1,0 +1,83 @@
+bot_name: 一百以内加法
+start_step: start
+variables:
+  a: !Int 1
+  b: !Int 2
+  ans: !Int 0
+  user_ans: !Int 0
+  l: !Int 0
+  r: !Int 100
+  count: !Int 0
+  step: !Int 1
+  max_count: !Int 5
+steps:
+  start:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Ne
+        - count
+        - max_count
+      step: calc
+      operation:
+      - !Rnd
+        - a
+        - l
+        - r
+      - !Rnd
+        - b
+        - l
+        - r
+      - !Add
+        - ans
+        - a
+        - b
+      - !Add
+        - count
+        - count
+        - step
+    - step: end
+      
+  calc:
+    description:
+    - 请计算 {} + {}
+    - - a
+      - b
+    transaction:
+    - pattern: (^\d+$)
+      step: check
+      operation:
+      - !Inp user_ans
+    - pattern: (.*)
+      step: invalid
+
+  invalid:
+    description:
+    - 请输入一个数字！
+    - []
+    transaction:
+    - step: calc
+
+  check:
+    transaction:
+    - compares:
+      - compare: !And
+        compare_type: !Eq
+        - user_ans
+        - ans
+      step: correct
+    - step: wrong
+
+  correct:
+    description:
+    - 正确！
+    - []
+    transaction:
+    - step: start
+
+  wrong:
+    description:
+    - 错误！
+    - []
+    transaction:
+    - step: start
