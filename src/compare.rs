@@ -50,7 +50,7 @@ impl CompareType {
             | CompareType::Le(a, b) => {
                 let a = variable.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
                 let b = variable.get(b).ok_or_else(|| format!("Variable {} not found", b))?;
-                if a.is_same_type(b) && a.is_vector().not() { // a, b are not vector and same type
+                if a.is_same_type(b) && a.is_vector().not() && a.is_dict().not() { // a, b are not vector and same type
                     Ok(())
                 } else {
                     Err("Type mismatch".to_string())

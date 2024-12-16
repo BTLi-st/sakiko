@@ -1,8 +1,8 @@
+use sakiko::check::check_config;
+use sakiko::SakikoConfig;
 /// 检测器，用于检测配置文件是否合法
 /// 用法：`cargo run --bin checker <config file>`
 use std::env;
-use sakiko::SakikoConfig;
-use sakiko::check::check_config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

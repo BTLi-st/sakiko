@@ -23,6 +23,9 @@ pub enum Operation {
     Rnd(String, String, String), // a = random(b, c)
     Shu(String),                 // shuffle a
 
+    Qry(String, String, String), // a = b.query(c)
+    Ins(String, String, String), // b.new(a, c)
+
     Inp(String), // a = input()
 }
 
@@ -38,9 +41,15 @@ impl Operation {
             | Operation::Sub(a, b, c)
             | Operation::Mul(a, b, c)
             | Operation::Div(a, b, c) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?;
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?;
                 if a.is_same_type(b) && a.is_same_type(c) && a.is_number() {
                     Ok(())
                 } else {
@@ -48,9 +57,15 @@ impl Operation {
                 }
             }
             Operation::Get(a, b, c) | Operation::Set(a, b, c) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?;
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?;
                 match (a, b, c) {
                     (VariableType::Str(_), VariableType::StrVec(b), VariableType::Int(c)) => {
                         if *c < 0 || (*c as usize) < b.len() {
@@ -73,7 +88,9 @@ impl Operation {
                 }
             }
             Operation::Let(a, b) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 if a.is_same_type(b) {
                     Ok(())
                 } else {
@@ -81,8 +98,12 @@ impl Operation {
                 }
             }
             Operation::Cpy(a, b) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
                 if a.is_same_type(b) {
                     Ok(())
                 } else {
@@ -90,9 +111,15 @@ impl Operation {
                 }
             }
             Operation::Rnd(a, b, c) => {
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?;
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?;
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 if (*a).is_same_type(&b) && (*a).is_same_type(&c) {
                     match a {
                         VariableType::Int(_) => Ok(()),
@@ -104,7 +131,9 @@ impl Operation {
                 }
             }
             Operation::Shu(a) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match a {
                     VariableType::StrVec(_)
                     | VariableType::IntVec(_)
@@ -113,9 +142,30 @@ impl Operation {
                 }
             }
             Operation::Inp(a) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match a {
                     VariableType::Str(_) | VariableType::Int(_) | VariableType::Float(_) => Ok(()),
+                    _ => Err("Type mismatch".to_string()),
+                }
+            }
+            Operation::Qry(a, b, c) | Operation::Ins(a, b, c) => {
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?;
+                match (a, b, c) {
+                    (VariableType::Str(_), VariableType::StrDic(_), VariableType::Str(_)) => Ok(()),
+                    (VariableType::Int(_), VariableType::IntDic(_), VariableType::Str(_)) => Ok(()),
+                    (VariableType::Float(_), VariableType::FloatDic(_), VariableType::Str(_)) => {
+                        Ok(())
+                    }
                     _ => Err("Type mismatch".to_string()),
                 }
             }
@@ -129,9 +179,17 @@ impl Operation {
             | Operation::Sub(a, b, c)
             | Operation::Mul(a, b, c)
             | Operation::Div(a, b, c) => {
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?.clone();
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?.clone();
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match (a, b, c) {
                     (VariableType::Int(a), VariableType::Int(b), VariableType::Int(c)) => {
                         match self {
@@ -155,9 +213,17 @@ impl Operation {
                 }
             }
             Operation::Get(a, b, c) => {
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?.clone();
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?.clone();
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match (a, b, c) {
                     (VariableType::Str(a), VariableType::StrVec(b), VariableType::Int(c)) => {
                         *a = b[c as usize].clone();
@@ -172,9 +238,17 @@ impl Operation {
                 }
             }
             Operation::Set(a, b, c) => {
-                let a = variables.get(a).ok_or_else(|| format!("Variable {} not found", a))?.clone();
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?.clone();
-                let b = variables.get_mut(b).ok_or_else(|| format!("Variable {} not found", b))?;
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let b = variables
+                    .get_mut(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
                 match (a, b, c) {
                     (VariableType::Str(a), VariableType::StrVec(b), VariableType::Int(c)) => {
                         b[c as usize] = a.clone();
@@ -189,18 +263,33 @@ impl Operation {
                 }
             }
             Operation::Let(a, b) => {
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 *a = b.clone();
             }
             Operation::Cpy(a, b) => {
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?.clone();
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?
+                    .clone();
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 *a = b;
             }
             Operation::Rnd(a, b, c) => {
-                let b = variables.get(b).ok_or_else(|| format!("Variable {} not found", b))?.clone();
-                let c = variables.get(c).ok_or_else(|| format!("Variable {} not found", c))?.clone();
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 let mut rng = ::rand::thread_rng();
                 match (a, b, c) {
                     (VariableType::Int(a), VariableType::Int(b), VariableType::Int(c)) => {
@@ -232,7 +321,9 @@ impl Operation {
                 }
             }
             Operation::Shu(a) => {
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match a {
                     VariableType::StrVec(a) => a.shuffle(&mut ::rand::thread_rng()),
                     VariableType::IntVec(a) => a.shuffle(&mut ::rand::thread_rng()),
@@ -245,7 +336,9 @@ impl Operation {
                     .get("input")
                     .ok_or("Variable input not found")?
                     .clone();
-                let a = variables.get_mut(a).ok_or_else(|| format!("Variable {} not found", a))?;
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
                 match (a, input) {
                     (VariableType::Str(a), VariableType::Str(b)) => *a = b.clone(),
                     (VariableType::Int(a), VariableType::Str(b)) => {
@@ -253,6 +346,56 @@ impl Operation {
                     }
                     (VariableType::Float(a), VariableType::Str(b)) => {
                         *a = b.parse().map_err(|_| "Invalid input")?
+                    }
+                    _ => return Err("Type mismatch".to_string()),
+                }
+            }
+            Operation::Qry(a, b, c) => {
+                let b = variables
+                    .get(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let a = variables
+                    .get_mut(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?;
+                match (a, b, c) {
+                    (VariableType::Str(a), VariableType::StrDic(b), VariableType::Str(c)) => {
+                        *a = b.get(&c).cloned().unwrap_or_else(|| "".to_string());
+                    }
+                    (VariableType::Int(a), VariableType::IntDic(b), VariableType::Str(c)) => {
+                        *a = *b.get(&c).unwrap_or(&0);
+                    }
+                    (VariableType::Float(a), VariableType::FloatDic(b), VariableType::Str(c)) => {
+                        *a = *b.get(&c).unwrap_or(&0.0);
+                    }
+                    _ => return Err("Type mismatch".to_string()),
+                }
+            }
+            Operation::Ins(a, b, c) => {
+                let a = variables
+                    .get(a)
+                    .ok_or_else(|| format!("Variable {} not found", a))?
+                    .clone();
+                let c = variables
+                    .get(c)
+                    .ok_or_else(|| format!("Variable {} not found", c))?
+                    .clone();
+                let b = variables
+                    .get_mut(b)
+                    .ok_or_else(|| format!("Variable {} not found", b))?;
+                match (a, b, c) {
+                    (VariableType::Str(a), VariableType::StrDic(b), VariableType::Str(c)) => {
+                        b.insert(c.clone(), a.clone());
+                    }
+                    (VariableType::Int(a), VariableType::IntDic(b), VariableType::Str(c)) => {
+                        b.insert(c.clone(), a.clone());
+                    }
+                    (VariableType::Float(a), VariableType::FloatDic(b), VariableType::Str(c)) => {
+                        b.insert(c.clone(), a.clone());
                     }
                     _ => return Err("Type mismatch".to_string()),
                 }
@@ -328,6 +471,14 @@ mod tests {
         variables.insert(
             "float_vec".to_string(),
             VariableType::FloatVec(vec![1.0, 2.0, 3.0]),
+        );
+        variables.insert(
+            "str_dic".to_string(),
+            VariableType::StrDic({
+                let mut dic = std::collections::HashMap::new();
+                dic.insert("a".to_string(), "b".to_string());
+                dic
+            }),
         );
         variables
     }
@@ -522,6 +673,24 @@ mod tests {
             Operation::Shu("str_vec".to_string()).calculate(&mut variables),
             Ok(())
         );
+        // Qry
+        Operation::Let("str1".to_string(), VariableType::Str("a".to_string()))
+            .calculate(&mut variables)
+            .unwrap();
+        assert_eq!(
+            Operation::Qry(
+                "str1".to_string(),
+                "str_dic".to_string(),
+                "str1".to_string()
+            )
+            .calculate(&mut variables),
+            Ok(())
+        );
+        assert_eq!(
+            variables.get("str1"),
+            Some(&VariableType::Str("b".to_string()))
+        );
+
         print!("{:?}", variables);
     }
 }
