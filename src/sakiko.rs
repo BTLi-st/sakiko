@@ -46,7 +46,7 @@ impl Session {
         self.now_step == "end"
     }
 
-    /// 获取当前步骤
+    /// 输出
     pub fn output(&self) -> Result<String, &'static str> {
         let step = self.config.get_step(&self.now_step).ok_or("Invalid step")?;
         Ok(step.description.fmt(&self.variables)?)
