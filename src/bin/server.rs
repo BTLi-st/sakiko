@@ -110,7 +110,7 @@ async fn main() {
                     }
                 }
             }
-            info!("Session ended");
+            info!("Session for {} end", cilent);
         });
     }
 }
