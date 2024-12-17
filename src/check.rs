@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn test_check_config() {
-        let config = SakikoConfig::deserialize_from_file("error.yaml").unwrap();
+        let config = SakikoConfig::deserialize_from_file("demo/error.yaml").unwrap();
         assert!(check_config(&config).is_err());
         print!("{}\n", check_config(&config).unwrap_err());
     }
