@@ -1,0 +1,66 @@
+bot_name: 课表查询系统
+start_step: start
+variables:
+  query: !Str ""
+  ans: !Str ""
+  empty: !Str ""
+  course: !StrDic
+    网络存储技术: "周一 8:00-9:35\n教三 437\n皮仁杰"
+    算法设计与分析: "周一 13:00-14:35\n教三 539\n叶文"
+    操作系统: "周二 9:50-11:25\n教四 401\n周五 8:00-9:35\n教三 217\n孟祥武"
+    "Python 程序设计": "周二 13:00-14:35\n教三 317\n李炜"
+    计算机网络技术实践: "周二 14:45-16:25\n教三 333\n吴军"
+    程序设计实践: "周三 8:00-9:35\n教二 339\n张海滨"
+    编译原理与技术: "周三 9:50-12:15\n教三 335\n王雅文"
+    篮球: "周四 13:00-14:35\n体育场\n陈明辉"
+    数据库系统原理: "周四 15:40-18:10\n图书馆一层\n邵蓥侠"
+steps:
+  start:
+    description:
+    - 欢迎使用课表查询系统
+    - []
+    transaction:
+    - step: input
+  input:
+    description:
+    - 请输入要查询的课程名称，或者输入“退出”退出系统
+    - []
+    transaction:
+    - pattern: 退出
+      step: goodbye
+    - pattern: (.*)
+      step: query
+      operation:
+      - !Inp query
+      - !Qry
+        - ans
+        - course
+        - query
+  query:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Eq
+        - ans
+        - empty
+      step: not_found
+    - step: found
+  not_found:
+    description:
+    - 未找到课程“{}”
+    - - query
+    transaction:
+    - step: input
+  found:
+    description:
+    - "课程“{}”的信息如下：\n{}"
+    - - query
+      - ans
+    transaction:
+    - step: input
+  goodbye:
+    description:
+    - 感谢使用课表查询系统
+    - []
+    transaction:
+    - step: end

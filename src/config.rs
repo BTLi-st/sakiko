@@ -244,6 +244,10 @@ mod tests {
             VariableType::StrVec(vec!["a".to_string(), "b".to_string()]),
         );
         config.add_variable("float_vec", VariableType::FloatVec(vec![1.0, 2.0, 3.0]));
+        let mut str_dic = HashMap::new();
+        str_dic.insert("key".to_string(), "value".to_string());
+        str_dic.insert("key2".to_string(), "value2".to_string());
+        config.add_variable("str_dic", VariableType::StrDic(str_dic));
         let mut output = Output("Start of the conversation".to_string(), Vec::new());
         config.add_step("start", &output);
         output = Output("End of the conversation {}".to_string(), vec!["int1".to_string()]);
