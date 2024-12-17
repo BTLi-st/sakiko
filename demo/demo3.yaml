@@ -1,0 +1,338 @@
+bot_name: 庄家
+start_step: start
+variables:
+  card: !StrVec
+  - 2
+  - 2
+  - 2
+  - 2
+  - 3
+  - 3
+  - 3
+  - 3
+  - 4
+  - 4
+  - 4
+  - 4
+  - 5
+  - 5
+  - 5
+  - 5
+  - 6
+  - 6
+  - 6
+  - 6
+  - 7
+  - 7
+  - 7
+  - 7
+  - 8
+  - 8
+  - 8
+  - 8
+  - 9
+  - 9
+  - 9
+  - 9
+  - 10
+  - 10
+  - 10
+  - 10
+  - J
+  - J
+  - J
+  - J
+  - Q
+  - Q
+  - Q
+  - Q
+  - K
+  - K
+  - K
+  - K
+  - A
+  score: !IntDic
+    2: 2
+    3: 3
+    4: 4
+    5: 5
+    6: 6
+    7: 7
+    8: 8
+    9: 9
+    10: 10
+    J: 10
+    Q: 10
+    K: 10
+  ace: !Str A
+  ace_score: !Int 11
+  ptr: !Int 0
+  one: !Int 1
+  tmp: !Int 0
+  banker_card: !Str ""
+  player_card: !Str ""
+  banker_min_score: !Int 0
+  banker_max_score: !Int 0
+  banker_score_limit: !Int 17
+  player_min_score: !Int 0
+  player_max_score: !Int 0
+  blackjack: !Int 21
+steps:
+  start:
+    description:
+    - 欢迎来到21点游戏！本次将会模拟单局单人对战 21 点游戏，使用一副牌，不考虑花色，没有筹码，只有一张 Ace。游戏开始！
+    - []
+    transaction:
+    - step: start_draw
+      operation:
+      - !Shu card
+      - !Get
+        - banker_card
+        - card
+        - ptr
+      - !Add
+        - ptr
+        - ptr
+        - one
+      - !Get
+        - player_card
+        - card
+        - ptr
+      - !Add
+        - ptr
+        - ptr
+        - one
+  start_draw:
+    description:
+    - 庄家的第一张牌是 {}。
+    - - banker_card
+    transaction:
+    - step: player_card_calc
+  player_card_calc:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Eq
+        - player_card
+        - ace
+      step: player_score_check
+      operation:
+      - !Add
+        - player_min_score
+        - player_min_score
+        - one
+      - !Add
+        - player_max_score
+        - player_max_score
+        - ace_score
+    - step: player_score_check
+      operation:
+      - !Qry
+        - tmp
+        - score
+        - player_card
+      - !Add
+        - player_min_score
+        - player_min_score
+        - tmp
+      - !Add
+        - player_max_score
+        - player_max_score
+        - tmp
+  player_score_check:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Gt
+        - player_min_score
+        - blackjack
+      step: player_bust
+    - compares:
+      - compare: Or
+        compare_type: !Eq
+        - player_min_score
+        - blackjack
+      - compare: Or
+        compare_type: !Eq
+        - player_max_score
+        - blackjack
+      step: win
+    - step: player_draw
+  player_draw:
+    description:
+    - 你的牌是 {}，请问是否继续要牌？（要牌/停牌）
+    - - player_card
+    transaction:
+    - pattern: 要牌
+      step: player_card_calc
+      operation:
+      - !Get
+        - player_card
+        - card
+        - ptr
+      - !Add
+        - ptr
+        - ptr
+        - one
+    - pattern: 停牌
+      step: player_stop
+    - pattern: (.*)
+      step: player_draw
+  player_stop:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Gt
+        - player_max_score
+        - blackjack
+      step: banker_card_calc
+      operation:
+      - !Cpy
+        - player_max_score
+        - player_min_score
+    - step: banker_card_calc
+  player_bust:
+    description:
+    - 玩家爆牌！最后一张牌是 {}。
+    - - player_card
+    transaction:
+    - step: lose
+  banker_card_calc:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Eq
+        - banker_card
+        - ace
+      step: banker_score_check
+      operation:
+      - !Add
+        - banker_min_score
+        - banker_min_score
+        - one
+      - !Add
+        - banker_max_score
+        - banker_max_score
+        - ace_score
+    - step: banker_score_check
+      operation:
+      - !Qry
+        - tmp
+        - score
+        - banker_card
+      - !Add
+        - banker_min_score
+        - banker_min_score
+        - tmp
+      - !Add
+        - banker_max_score
+        - banker_max_score
+        - tmp
+  banker_score_check:
+    transaction:
+    - compares:
+      - compare: Or
+        compare_type: !Gt
+        - banker_min_score
+        - blackjack
+      step: banker_bust
+    - compares:
+      - compare: Or
+        compare_type: !Eq
+        - banker_min_score
+        - blackjack
+      - compare: Or
+        compare_type: !Eq
+        - banker_max_score
+        - blackjack
+      step: lose
+    - compares:
+      - compare: And
+        compare_type: !Ge
+        - banker_max_score
+        - banker_score_limit
+      - compare: And
+        compare_type: !Lt
+        - banker_max_score
+        - blackjack
+      - compare: Or
+        compare_type: !Gt
+        - banker_min_score
+        - banker_score_limit
+      step: banker_stop
+    - step: banker_draw
+  banker_draw:
+    transaction:
+    - step: banker_show
+      operation:
+      - !Get
+        - banker_card
+        - card
+        - ptr
+      - !Add
+        - ptr
+        - ptr
+        - one
+  banker_show:
+    description:
+    - 庄家的牌是 {}。
+    - - banker_card
+    transaction:
+    - step: banker_card_calc
+  banker_stop:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Gt
+        - banker_max_score
+        - blackjack
+      step: compare
+      operation:
+      - !Cpy
+        - banker_max_score
+        - banker_min_score
+    - step: compare
+  banker_bust:
+    description:
+    - 庄家爆牌！
+    - []
+    transaction:
+    - step: win
+  compare:
+    transaction:
+    - compares:
+      - compare: And
+        compare_type: !Gt
+        - player_max_score
+        - banker_max_score
+      step: win
+    - compares:
+      - compare: And
+        compare_type: !Lt
+        - player_max_score
+        - banker_max_score
+      step: lose
+    - compares:
+      - compare: And
+        compare_type: !Eq
+        - player_max_score
+        - banker_max_score
+      step: draw
+  win:
+    description:
+    - 你赢了！
+    - []
+    transaction:
+    - step: end
+  lose:
+    description:
+    - 你输了！
+    - []
+    transaction:
+    - step: end
+  draw:
+    description:
+    - 平局！
+    - []
+    transaction:
+    - step: end

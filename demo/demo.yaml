@@ -1,4 +1,4 @@
-bot_name: 一百以内加法
+bot_name: 加法口算器
 start_step: start
 variables:
   a: !Int 1
@@ -10,6 +10,8 @@ variables:
   count: !Int 0
   step: !Int 1
   max_count: !Int 5
+  win: !Int 0
+  lose: !Int 0
 steps:
   start:
     transaction:
@@ -36,7 +38,7 @@ steps:
         - count
         - count
         - step
-    - step: end
+    - step: finish
       
   calc:
     description:
@@ -74,6 +76,11 @@ steps:
     - []
     transaction:
     - step: start
+      operation:
+      - !Add
+        - win
+        - win
+        - step
 
   wrong:
     description:
@@ -81,3 +88,18 @@ steps:
     - []
     transaction:
     - step: start
+      operation:
+      - !Add
+        - lose
+        - lose
+        - step
+
+  finish:
+    description:
+    - 您的得分是 {}/{}，正确{}题，错误{}题
+    - - win
+      - max_count
+      - win
+      - lose
+    transaction:
+    - step: end
