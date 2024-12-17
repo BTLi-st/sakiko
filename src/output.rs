@@ -1,14 +1,14 @@
-// Sakiko 的输出
-// 输出类包含了一个字符串模板和一个字符串数组，字符串数组中的字符串是变量名，字符串模板中的 {} 会被替换为变量的值（类似 format! 宏）。
+/// Sakiko 的输出
+/// 输出类包含了一个字符串模板和一个字符串数组，字符串数组中的字符串是变量名，字符串模板中的 {} 会被替换为变量的值（类似 format! 宏）。
 use ::serde::{Deserialize, Serialize};
 
 use crate::variable::Variables;
 
-// 输出类
+/// 输出类
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Output(pub  String, pub Vec<String>);
 
-// 输出类的默认实现（实现 yaml 文件中可以不写该字段）
+/// 输出类的默认实现（实现 yaml 文件中可以不写该字段）
 impl Default for Output {
     fn default() -> Self {
         Self("".to_string(), Vec::new())
@@ -16,17 +16,17 @@ impl Default for Output {
 }
 
 impl Output {
-    // 创建一个新的输出类
+    /// 创建一个新的输出类
     pub fn new(name: String, vars: Vec<String>) -> Self {
         Self(name, vars)
     }
 
-    // 判断是否为空
+    /// 判断是否为空
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    // 格式化输出
+    /// 格式化输出
     pub fn fmt(&self, variables: &Variables) -> Result<String, &'static str> {
         for var in &self.1 {
             if variables.get(var).is_none() {
@@ -51,7 +51,7 @@ impl Output {
         Ok(result)
     }
 
-    // 检查变量是否存在（检测用，会报告所有不存在的变量）
+    /// 检查变量是否存在（检测用，会报告所有不存在的变量）
     pub fn check(&self, variables: &Variables) -> Result<(), String> {
         let mut result = Vec::new();
         for var in &self.1 {

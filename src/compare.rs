@@ -1,7 +1,7 @@
-// Sakiko 的比较
-// 比较类包含了一个比较类型和一个比较值，比较类型包含了等于、不等于、大于、大于等于、小于、小于等于，比较值包含了两个变量名。
-// 支持的类型有整数、浮点数和字符串，比较时会检查类型是否匹配。
-// 计算时支持与和或
+/// Sakiko 的比较
+/// 比较类包含了一个比较类型和一个比较值，比较类型包含了等于、不等于、大于、大于等于、小于、小于等于，比较值包含了两个变量名。
+/// 支持的类型有整数、浮点数和字符串，比较时会检查类型是否匹配。
+/// 计算时支持与和或
 use std::ops::Not;
 
 use ::serde::{Deserialize, Serialize};
@@ -9,7 +9,7 @@ use ::serde::{Deserialize, Serialize};
 pub use crate::variable::VariableType;
 pub use crate::variable::Variables;
 
-// 比较类型
+/// 比较类型
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub enum CompareType {
     Eq(String, String), // Equal
@@ -20,26 +20,26 @@ pub enum CompareType {
     Le(String, String), // Less or Equal
 }
 
-// 比较
+/// 比较
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone, Copy)]
 pub enum Compare {
     And,
     Or,
 }
 
-// 比较项
+/// 比较项
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct CompareItem {
     pub compare: Compare,
     pub compare_type: CompareType,
 }
 
-// 比较类
+/// 比较类
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Compares (pub Vec<CompareItem>);
 
 impl CompareType {
-    // 检查比较类型
+    /// 检查比较类型
     pub fn compare_check(&self, variable: &Variables) -> Result<(), String> {
         match self {
             CompareType::Eq(a, b)
@@ -59,7 +59,7 @@ impl CompareType {
         }
     }
 
-    // 计算比较
+    /// 计算比较
     pub fn compare(&self, variable: &Variables) -> Result<bool, String> {
         let (a, b) = match self {
             CompareType::Eq(a, b)
@@ -110,7 +110,7 @@ impl Compares {
         self.0.push(compare);
     }
 
-    // 检查比较（检测用，会报告所有错误）
+    /// 检查比较（检测用，会报告所有错误）
     pub fn check(&self, variable: &Variables) -> Result<(), String> {
         let mut errors = Vec::new();
 
@@ -131,7 +131,7 @@ impl Compares {
         }
     }
 
-    // 计算比较
+    /// 计算比较
     pub fn calc(&self, variable: &Variables) -> Result<bool, String> {
         self.0
             .iter()

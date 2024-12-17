@@ -1,12 +1,12 @@
-// Sakiko 中的变量操作
-// Sakiko 中的变量操作是通过 Operation 类实现的，Operation 类包含了一系列操作
+/// Sakiko 中的变量操作
+/// Sakiko 中的变量操作是通过 Operation 类实现的，Operation 类包含了一系列操作
 use ::rand::seq::SliceRandom;
 use ::rand::Rng;
 use ::serde::{Deserialize, Serialize};
 
 use crate::variable::{VariableType, Variables};
 
-// 操作
+/// 操作
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub enum Operation {
     Add(String, String, String), // a = b + c
@@ -29,14 +29,15 @@ pub enum Operation {
     Inp(String), // a = input()
 }
 
-// 操作集合
+/// 操作集合
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Operations(pub Vec<Operation>);
 
 impl Operation {
-    // 检查操作，类型匹配
+    /// 检查操作，类型匹配
     pub fn operation_check(&self, variables: &Variables) -> Result<(), String> {
         match self {
+            // 加减乘除
             Operation::Add(a, b, c)
             | Operation::Sub(a, b, c)
             | Operation::Mul(a, b, c)
@@ -56,6 +57,7 @@ impl Operation {
                     Err("Type mismatch".to_string())
                 }
             }
+            // 获取
             Operation::Get(a, b, c) | Operation::Set(a, b, c) => {
                 let a = variables
                     .get(a)
@@ -87,6 +89,7 @@ impl Operation {
                     _ => Err("Type mismatch".to_string()),
                 }
             }
+            // 赋值
             Operation::Let(a, b) => {
                 let a = variables
                     .get(a)
@@ -97,6 +100,7 @@ impl Operation {
                     Err("Type mismatch".to_string())
                 }
             }
+            // 复制
             Operation::Cpy(a, b) => {
                 let a = variables
                     .get(a)
@@ -110,6 +114,7 @@ impl Operation {
                     Err("Type mismatch".to_string())
                 }
             }
+            // 随机
             Operation::Rnd(a, b, c) => {
                 let b = variables
                     .get(b)
@@ -130,6 +135,7 @@ impl Operation {
                     Err("Type mismatch".to_string())
                 }
             }
+            // 洗牌
             Operation::Shu(a) => {
                 let a = variables
                     .get(a)
@@ -141,6 +147,7 @@ impl Operation {
                     _ => Err("Type mismatch".to_string()),
                 }
             }
+            // 转换输入
             Operation::Inp(a) => {
                 let a = variables
                     .get(a)
@@ -150,6 +157,7 @@ impl Operation {
                     _ => Err("Type mismatch".to_string()),
                 }
             }
+            // 查询
             Operation::Qry(a, b, c) | Operation::Ins(a, b, c) => {
                 let a = variables
                     .get(a)
@@ -172,9 +180,10 @@ impl Operation {
         }
     }
 
-    // 计算操作
+    /// 计算操作
     pub fn calculate(&self, variables: &mut Variables) -> Result<(), String> {
         match self {
+            // 加减乘除
             Operation::Add(a, b, c)
             | Operation::Sub(a, b, c)
             | Operation::Mul(a, b, c)
@@ -212,6 +221,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 获取
             Operation::Get(a, b, c) => {
                 let b = variables
                     .get(b)
@@ -237,6 +247,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 设置
             Operation::Set(a, b, c) => {
                 let a = variables
                     .get(a)
@@ -262,12 +273,14 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 赋值
             Operation::Let(a, b) => {
                 let a = variables
                     .get_mut(a)
                     .ok_or_else(|| format!("Variable {} not found", a))?;
                 *a = b.clone();
             }
+            // 复制
             Operation::Cpy(a, b) => {
                 let b = variables
                     .get(b)
@@ -278,6 +291,7 @@ impl Operation {
                     .ok_or_else(|| format!("Variable {} not found", a))?;
                 *a = b;
             }
+            // 随机
             Operation::Rnd(a, b, c) => {
                 let b = variables
                     .get(b)
@@ -320,6 +334,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 洗牌
             Operation::Shu(a) => {
                 let a = variables
                     .get_mut(a)
@@ -331,6 +346,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 转换输入
             Operation::Inp(a) => {
                 let input = variables
                     .get("input")
@@ -350,6 +366,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 查询
             Operation::Qry(a, b, c) => {
                 let b = variables
                     .get(b)
@@ -375,6 +392,7 @@ impl Operation {
                     _ => return Err("Type mismatch".to_string()),
                 }
             }
+            // 插入
             Operation::Ins(a, b, c) => {
                 let a = variables
                     .get(a)
@@ -405,7 +423,7 @@ impl Operation {
     }
 }
 
-// 操作集合继承数组的方法
+/// 操作集合继承数组的方法
 impl std::ops::Deref for Operations {
     type Target = Vec<Operation>;
 
@@ -425,7 +443,7 @@ impl Operations {
         Operations(Vec::new())
     }
 
-    // 检查操作集合（检测用，会报告所有错误）
+    /// 检查操作集合（检测用，会报告所有错误）
     pub fn check(&self, variables: &Variables) -> Result<(), String> {
         let mut errors = Vec::new();
         for operation in &self.0 {
@@ -440,7 +458,7 @@ impl Operations {
         }
     }
 
-    // 计算操作集合
+    /// 计算操作集合
     pub fn calculate(&self, variables: &mut Variables) -> Result<(), String> {
         for operation in &self.0 {
             operation.calculate(variables)?;

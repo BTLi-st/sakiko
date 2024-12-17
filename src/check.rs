@@ -1,7 +1,9 @@
-// 实现配置的检测
+/// 实现配置的检测
 
 use crate::config::SakikoConfig;
 
+/// 检测 config 是否合法
+/// 传入配置，返回错误信息
 pub fn check_config(config: &SakikoConfig) -> Result<(), String> {
     let mut result = Vec::new();
     // 检查所有步骤是否存在

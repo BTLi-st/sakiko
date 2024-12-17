@@ -1,7 +1,9 @@
-// Module: variable
+/// 变量
+/// 提供三种基础变量以及它们的数组和字典形式
 use ::serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// 变量类型
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub enum VariableType {
     Str(String),
@@ -15,10 +17,11 @@ pub enum VariableType {
     FloatDic(HashMap<String, f64>),
 }
 
+/// 变量表
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Variables(pub std::collections::HashMap<String, VariableType>);
 
-// 继承自 HashMap 的方法
+/// 继承自 HashMap 的方法
 impl std::ops::Deref for Variables {
     type Target = std::collections::HashMap<String, VariableType>;
 
@@ -38,18 +41,22 @@ impl Variables {
         Variables(std::collections::HashMap::new())
     }
 
+    /// 插入变量
     pub fn insert(&mut self, key: String, value: VariableType) {
         self.0.insert(key, value);
     }
 
+    /// 获取变量
     pub fn get(&self, key: &str) -> Option<&VariableType> {
         self.0.get(key)
     }
 
+    /// 获取变量的可变引用
     pub fn get_mut(&mut self, key: &str) -> Option<&mut VariableType> {
         self.0.get_mut(key)
     }
 
+    /// 检查是否有 input 变量
     pub fn has_input(&self) -> bool {
         self.0.contains_key("input")
     }
