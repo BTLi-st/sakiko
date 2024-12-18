@@ -304,6 +304,7 @@ mod tests {
         let file_path = "test.yaml";
         config.serialize_to_file(file_path).unwrap();
         let deserialized = SakikoConfig::deserialize_from_file(file_path).unwrap();
+        print!("{:?}", deserialized);
         assert_eq!(config, deserialized);
     }
 }
